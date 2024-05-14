@@ -1,0 +1,54 @@
+<div class="row mb-3">
+    <div class="col-md-6 col-lg mb-2">
+        <div *ngIf="$countries | async as countries; else disabledCountrySelect" class="form-floating">
+            <select class="form-select" id="country" [ngModel]="country" (ngModelChange)="onCountryChange($event)">
+                <option *ngFor="let country of countries" [value]="country.id">{{country.name}}</option>
+            </select>
+            <label for="country">Country</label>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg mb-2">
+        <div *ngIf="$country | async as country; else disabledCitySelect" class="form-floating">
+            <select class="form-select" id="city" [ngModel]="city" (ngModelChange)="onCityChange($event)">
+                <option *ngFor="let city of country.cities" [value]="city.id">{{city.name}}</option>
+            </select>
+            <label for="city">City</label>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg mb-2">
+        <div class="form-floating">
+            <input [ngModel]="start" type="date" id="start" class="form-control" [min]="minStartPeriod()"
+                (ngModelChange)="onStartChange($event)">
+            <label for="start">Start</label>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg mb-2">
+        <div class="form-floating">
+            <input [(ngModel)]="end" type="date" id="end" class="form-control" [min]="minEndPeriod()"
+                (ngModelChange)="onEndChange($event)">
+            <label for="end">End</label>
+        </div>
+    </div>
+
+    <div class="col mb-2">
+        <button type="button" class="btn btn-primary h-100" [disabled]="!canSearch" (click)="onSearchClick()">Search
+        </button>
+    </div>
+</div>
+
+<ng-template #disabledCountrySelect>
+    <div class="form-floating">
+        <select class="form-select" disabled id="country_disabled"></select>
+        <label for="country_disabled">Country</label>
+    </div>
+</ng-template>
+
+<ng-template #disabledCitySelect>
+    <div class="form-floating">
+        <select class="form-select" disabled id="city_disabled"></select>
+        <label for="city_disabled">City</label>
+    </div>
+</ng-template>

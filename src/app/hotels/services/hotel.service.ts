@@ -2,13 +2,15 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { SearchHotelsQuerysResult } from '../interfaces/search-hotels-query-result';
+import { environment } from '../../../environments/environment';
+import { OrderBy } from '../interfaces/order-by';
 
 @Injectable({
   providedIn: 'root'
 })
 export class HotelService {
 
-  baseUrl = 'https://localhost:7097/api/hotels';
+  baseUrl = `${environment.apiUrl}/hotels`;
 
   constructor(private readonly http: HttpClient) {
 
@@ -25,5 +27,20 @@ export class HotelService {
       start: start,
       end: end
     });
+  }
+
+  ordderHotelsBy(hotels: SearchHotelsQuerysResult[], orderBy: OrderBy) : SearchHotelsQuerysResult[] {
+    switch (orderBy) {
+      case OrderBy.priceAsc:
+        return hotels.sort((a, b) => a.totalPrice - b.totalPrice);
+      case OrderBy.priceDesc:
+        return hotels.sort((a, b) => b.totalPrice - a.totalPrice);
+      case OrderBy.ratingAsc:
+        return hotels.sort((a, b) => a.rating - b.rating);
+      case OrderBy.ratingDesc:
+        return hotels.sort((a, b) => b.rating - a.rating);
+      default:
+        return hotels;
+    }
   }
 }

@@ -7,12 +7,13 @@
         <div class="col-md-8">
             <div class="card-body">
                 <h5 class="card-title">{{hotel.name}}</h5>
-                <p class="card-text">
-                    rating: {{hotel.rating | number: '1.1-1'}} |
-                    price per night:{{hotel.pricePerNight}}$ |
-                    total price: {{hotel.totalPrice}}$ | nights: {{hotel.totalNights}}</p>
                 <p class="card-text"><small class="text-body-secondary">{{hotel.country}} - {{hotel.city}}</small></p>
-                <p class="card-text"><small class="text-body-secondary">Occupied: {{hotel.occupied}}</small></p>
+                <p class="card-text">
+                    Rating: {{hotel.rating | number: '1.1-1'}}<br>
+                    Price per night: <b>{{hotel.pricePerNight}}$</b><br>
+                    Total price: <b>{{hotel.totalPrice}}$</b> for {{hotel.totalNights}} night(s)
+                </p>
+                <p class="card-text"><small class="text-body-secondary">{{hotel.occupied ? 'Not available' : 'Available'}}</small></p>
                 <button type="button" class="btn btn-primary" [disabled]="!canBook()" (click)="onBookClicked()">Book
                 </button>
             </div>

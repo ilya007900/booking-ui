@@ -10,12 +10,13 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HotelComponent } from '../hotel/hotel.component';
 import { NotificationService } from '../../../shared/services/notification.service';
-import { DatesRange } from '../../../shared/helpers/dates-range';
+import { OrderBy } from '../../interfaces/order-by';
+import { HotelsSearchFormComponent } from '../hotels-search-form/hotels-search-form.component';
 
 @Component({
   selector: 'app-hotels-shell',
   standalone: true,
-  imports: [CommonModule, FormsModule, HotelComponent],
+  imports: [CommonModule, FormsModule, HotelComponent, HotelsSearchFormComponent],
   templateUrl: './hotels-shell.component.html',
   styleUrl: './hotels-shell.component.scss'
 })
@@ -23,26 +24,15 @@ export class HotelsShellComponent implements OnInit {
   $hotels!: Observable<SearchHotelsQuerysResult[]>;
   $countries!: Observable<GetCountriesQueryResult[]>;
   $country!: Observable<Country>;
-  selectedCountry: number | null = null;
 
-  datesRange!: DatesRange;
+  country: number | null = null;
+  city: number | null = null;
 
-  cityId!: number;
+  start!: string;
+  end!: string;
 
-  get start(): string {
-    return this.datesRange?.start;
-  }
-
-  set start(value: string) {
-    this.datesRange.updateStart(value);
-  }
-
-  get end(): string {
-    return this.datesRange?.end;
-  }
-
-  set end(value: string) {
-    this.datesRange.updateEnd(value);
+  get canSearch(): boolean {
+    return !!(this.city && this.start && this.end);
   }
 
   orderByValues = [OrderBy.priceAsc, OrderBy.priceDesc, OrderBy.ratingAsc, OrderBy.ratingDesc];
@@ -56,20 +46,22 @@ export class HotelsShellComponent implements OnInit {
     activatedRoute: ActivatedRoute) {
 
     activatedRoute.queryParamMap.subscribe(result => {
-      this.cityId = Number.parseInt(result.get('cityId')!);
-      const from = result.get('from')!;
-      const to = result.get('to')!;
+      this.city = Number.parseInt(result.get('cityId')!);
+      this.start = result.get('from')!;
+      this.end = result.get('to')!;
 
-      this.datesRange = new DatesRange(from, to, new Date());
-
-      if (!this.canSearch()) {
+      if (!this.canSearch) {
         return;
       }
 
-      this.$hotels = this.hotelService.searchHotels(this.cityId, from, to);
+      this.$hotels = this.hotelService.searchHotels(this.city, this.start, this.end);
 
-      this.$country = this.geographicalDataService.getCountryByCityId(this.cityId).pipe(map(country => {
-        this.selectedCountry = country.id
+      if(this.$country){
+        return;
+      }
+
+      this.$country = this.geographicalDataService.getCountryByCityId(this.city).pipe(map(country => {
+        this.country = country.id
         return country;
       }));
     });
@@ -80,44 +72,18 @@ export class HotelsShellComponent implements OnInit {
   }
 
   orderByChnage(orderBy: OrderBy, hotels: SearchHotelsQuerysResult[]): void {
-    switch (orderBy) {
-      case OrderBy.priceAsc:
-        hotels.sort((a, b) => a.totalPrice - b.totalPrice);
-        return;
-      case OrderBy.priceDesc:
-        hotels.sort((a, b) => b.totalPrice - a.totalPrice);
-        return;
-      case OrderBy.ratingAsc:
-        hotels.sort((a, b) => a.rating - b.rating);
-        return;
-      case OrderBy.ratingDesc:
-        hotels.sort((a, b) => b.rating - a.rating);
-        return;
-      default:
-        return;
-    }
-  }
-
-  minStartPeriod(): string {
-    return this.datesRange.minStart;
-  }
-
-  minEndPeriod(): string {
-    return this.datesRange.minEnd;
+    hotels = this.hotelService.ordderHotelsBy(hotels, orderBy);
   }
 
   onCountrySelected(country: number): void {
     this.$country = this.geographicalDataService.getCountry(country);
   }
 
-  canSearch(): boolean {
-    return !!(this.cityId && this.start && this.end);
-  }
-
   onSearchClick(): void {
-    this.router.navigate([], { queryParams: { cityId: this.cityId!, from: this.start, to: this.end } }).then(succeed => {
+    this.orderBy = OrderBy.none;
+    this.router.navigate([], { queryParams: { cityId: this.city!, from: this.start, to: this.end } }).then(succeed => {
       if (!succeed) {
-        this.$hotels = this.hotelService.searchHotels(this.cityId, this.start, this.end);
+        this.$hotels = this.hotelService.searchHotels(this.city!, this.start, this.end);
       }
     });
   }
@@ -135,11 +101,4 @@ export class HotelsShellComponent implements OnInit {
   }
 }
 
-export enum OrderBy {
-  none = "",
-  ratingAsc = "Rating ASC",
-  ratingDesc = "Rating DESC",
-  priceAsc = "Price ASC",
-  priceDesc = "Price DESC"
-};
 

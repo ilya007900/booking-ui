@@ -3,13 +3,14 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { GetCountriesQueryResult } from '../interfaces/get-countries-query-result';
 import { Country } from '../interfaces/country';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class GeographicalDataService {
 
-  baseUrl = 'https://localhost:7097/api/GeographicalData';
+  baseUrl = `${environment.apiUrl}/GeographicalData`;
 
   constructor(private readonly http: HttpClient) {
 

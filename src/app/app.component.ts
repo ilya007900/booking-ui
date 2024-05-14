@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterOutlet } from '@angular/router';
-import { UserService } from './shared/services/user.service';
 
 @Component({
   selector: 'app-root',
